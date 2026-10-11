@@ -8,3 +8,9 @@ FPGA game based off of Atari Pong using Digilent Basys 3.
 ## Testing
 
 ## Conclusion
+
+## References
+https://chipverify.com/systemverilog/systemverilog-datatypes#google_vignette
+https://www.fpga4fun.com/VGA.html
+
+

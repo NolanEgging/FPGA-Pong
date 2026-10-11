@@ -13,4 +13,4 @@ FPGA game based off of Atari Pong using Digilent Basys 3.
 ### https://chipverify.com/systemverilog/systemverilog-datatypes#google_vignette
 ### https://www.fpga4fun.com/VGA.html
 ### https://digilent.com/reference/_media/basys3:basys3_rm.pdf
-
+### https://projectf.io/posts/video-timings-vga-720p-1080p/

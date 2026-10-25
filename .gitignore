@@ -1,0 +1,8 @@
+# exclude cash
+*.cache
+*.hw
+*.runs
+
+# include all sv files and bitfiles
+!*.sv
+!*.bit

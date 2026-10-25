@@ -4,8 +4,8 @@
 *.runs
 
 # exclude cocotb
-*/sim_build/*
-*/results.xml
+sim_build/
+results.xml
 
 # include all sv files and bitfiles
 !*.sv

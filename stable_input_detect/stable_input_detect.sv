@@ -21,8 +21,8 @@ Signals:
 
 module stable_input_detect #(
     parameter        CLKS_PER_MS       = 5, // 100000, //Default 100MHz
-    parameter        STABLE_TIMEOUT_MS = 2, // 10,    // Min 0, Max 15
-    parameter string TIMEOUT_METHOD    = "PRE"   //PRE or POST
+    parameter        STABLE_TIMEOUT_MS = 1, // 10,    // Min 0, Max 15
+    parameter string TIMEOUT_METHOD    = "POST"   //PRE or POST
 ) (
     input  wire  i_rst,
     input  wire  i_clk,
@@ -64,25 +64,43 @@ module stable_input_detect #(
         end
     end
 
-    // PRE - Wait for stable input before setting output
-
     always_ff @(posedge i_clk or posedge i_rst) begin
         if(i_rst) begin
             tick_timer <= 1'b0;
             sig_out    <= 1'b0;
         end else begin
-            if(timer == STABLE_TIMEOUT_MS) begin
-                tick_timer <= 1'b0;
-                sig_out    <= i_sig;
-            end else if (tick_timer == 1'b1) begin
-                tick_timer <= 1'b1;
-                sig_out    <= sig_out;
-            end else if (sig_dly != i_sig) begin
-                tick_timer <= 1'b1;
-                sig_out    <= sig_out;
-            end else begin
-                tick_timer <= 1'b0;
-                sig_out    <= sig_out;
+            if (TIMEOUT_METHOD == "PRE") begin
+                // PRE - Wait for stable input before setting output
+
+                if(timer == STABLE_TIMEOUT_MS) begin
+                    tick_timer <= 1'b0;
+                    sig_out    <= i_sig;
+                end else if (tick_timer == 1'b1) begin
+                    tick_timer <= 1'b1;
+                    sig_out    <= sig_out;
+                end else if (sig_dly != i_sig) begin
+                    tick_timer <= 1'b1;
+                    sig_out    <= sig_out;
+                end else begin
+                    tick_timer <= 1'b0;
+                    sig_out    <= sig_out;
+                end
+            end else if (TIMEOUT_METHOD == "POST") begin
+                // POST - Set output and then wait before checking for the next edge
+
+                if(timer == STABLE_TIMEOUT_MS) begin
+                    tick_timer <= 1'b0;
+                    sig_out    <= sig_out;
+                end else if (tick_timer == 1'b1) begin
+                    tick_timer <= 1'b1;
+                    sig_out    <= sig_out;
+                end else if (sig_dly != i_sig) begin
+                    tick_timer <= 1'b1;
+                    sig_out    <= i_sig;
+                end else begin
+                    tick_timer <= 1'b0;
+                    sig_out    <= sig_out;
+                end
             end
         end
     end

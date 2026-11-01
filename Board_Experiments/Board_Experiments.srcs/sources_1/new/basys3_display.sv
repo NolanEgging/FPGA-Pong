@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 module basys3_display(
     input  wire             i_clk_100MHz,
     input  wire             i_rst_100MHz,

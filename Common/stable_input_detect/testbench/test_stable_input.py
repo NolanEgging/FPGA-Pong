@@ -35,7 +35,7 @@ async def monitor_signals(dut):
         curr_input = dut.i_sig.value
         dut.i_sig._log.info("Input: " + str(curr_input) + "  Output: " + str(output_val))
         dut.tick_timer._log.info(f"Timer Enable: {dut.tick_timer.value}")
-        dut.timer._log.info(f"Clocks: {dut.counter.value.to_unsigned()}, Timer: {dut.timer.value.to_unsigned()}\n")
+        dut.timer._log.info(f"Clocks: {dut.counter.value.to_unsigned()}\nTimer: {dut.timer.value.to_unsigned()}\n")
 
 
 
@@ -44,6 +44,15 @@ async def stable_input_test(dut):
     """Test"""
 
     logger = logging.getLogger("test_stable_input")
+
+    clk_sim   = dut.CLKS_PER_MS.value.to_unsigned()
+    timer_sim = dut.STABLE_TIMEOUT_MS.value.to_unsigned()
+
+    expected_timeout = clk_sim * timer_sim
+
+    method_bytes = dut.TIMEOUT_METHOD.value
+    method_str   = method_bytes.decode("utf-8")
+    dut.TIMEOUT_METHOD._log.info(f"~~~\nTIMEOUT METHOD: {method_str}\nEXPECTED TIMEOUT: "+ str(expected_timeout)+"\n~~~\n")
 
     # Set initial input value to prevent it from floating
     curr_input = 0
@@ -70,25 +79,22 @@ async def stable_input_test(dut):
     sig_mon = cocotb.start_soon(monitor_signals(dut))
     
     input_to_set = 1
-    await create_unstable_input(dut, input_to_set)
 
-    while(dut.tick_timer.value == 1):
-        await RisingEdge(dut.i_clk)
+    await ClockCycles(dut.i_clk, 1)
+    await create_unstable_input(dut, input_to_set)
+    await ClockCycles(dut.i_clk, expected_timeout+6)
 
     output_val = dut.o_sig.value
     assert output_val == input_to_set
 
     input_to_set = 0
     await create_unstable_input(dut, input_to_set)
-
-    while(dut.tick_timer.value == 1):
-        await RisingEdge(dut.i_clk)
+    await ClockCycles(dut.i_clk, expected_timeout+6)
 
     output_val = dut.o_sig.value
     assert output_val == input_to_set
 
-    await ClockCycles(dut.i_clk, 2)
-
+    await ClockCycles(dut.i_clk, 1)
     sig_mon.cancel()
 
 
